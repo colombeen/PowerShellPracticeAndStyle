@@ -1,6 +1,6 @@
 ### Naming Conventions
 
-In general, prefer the use of full explicit names for commands and parameters rather than aliases or short forms. There are tools [Expand-Alias](https://github.com/PoshCode/ModuleBuilder/blob/master/ResolveAlias.psm1) for fixing many, but not all of these issues.
+In general, prefer the use of full explicit names for commands and parameters rather than aliases or short forms. There are tools like [PSScriptAnalyzer](https://github.com/PowerShell/PSScriptAnalyzer)'s `Invoke-Formatter` and scripts like [Expand-Alias](https://github.com/PoshCode/ModuleBuilder/blob/master/PotentialContribution/ResolveAlias.psm1) for fixing many, but not all of these issues.
 
 #### Use the full name of each command.
 
@@ -28,7 +28,9 @@ Get-Process -Name Explorer
 
 #### Use full, explicit paths when possible.
 
-When writing scripts, it's really only safe to use `..` or `.` in a path if you have previously explicitly set the location (within the script), and even then you should beware of using relative paths when calling .Net methods or legacy/native applications, because they will use the `[Environment]::CurrentDirectory` rather than PowerShell's present working directory (`$PWD`). Because checking for these types of errors is tedious (and because they are easy to over-look) it's best to avoid using relative paths altogether, and instead, base your paths off of $PSScriptRoot (the folder your script is in) when necessary.
+When writing scripts, it is only safe to use `..` or `.` in a path if you have previously set the location explicitly (within the current function or script). Even if you _have_ explictly set the path, you must beware of using relative paths when calling .Net methods or legacy/native applications, because they will use `[Environment]::CurrentDirectory` which is not automatically updated to PowerShell's present working directory (`$PWD`).
+
+Because troubleshooting these types of errors is tedious (and they are easy to over-look) it's best to avoid using relative paths altogether, and instead, base your paths off of $PSScriptRoot (the folder your script is in) when necessary.
 
 ```PowerShell
 # Do not write:
@@ -37,11 +39,23 @@ Get-Content .\README.md
 # Especially do not write:
 [System.IO.File]::ReadAllText(".\README.md")
 
-# Instead write:
-Get-Content -Path (Join-Path -Path $PSScriptRoot -ChildPath README.md)
 
-# Or even use string concatenation:
+# Although you can write:
+Push-Location $PSScriptRoot
+Get-Content README.md
+
+# It would be better to write:
+Get-Content -Path (Join-Path -Path $PSScriptRoot -ChildPath README.md)
+# Or to use string concatenation:
+Get-Content "$PSScriptRoot\README.md"
+
+# For calling .net methods, pass full paths:
 [System.IO.File]::ReadAllText("$PSScriptRoot\README.md")
+
+# Optionally by calling Convert-Path
+Push-Location $PSScriptRoot
+[System.IO.File]::ReadAllText((Convert-Path README.md))
+
 ```
 
 ##### Avoid the use of `~` to represent the home folder.
@@ -52,10 +66,15 @@ The meaning of ~ is unfortunately dependent on the "current" provider at the tim
 PS C:\Windows\system32> cd ~
 PS C:\Users\Name> cd HKCU:\Software
 PS HKCU:\Software> cd ~
-cd : Home location for this provider is not set. To set the home location, call "(get-psprovider 'Registry').Home = 'path'".
+cd : Home location for this provider is not set. To set the home location, call "(Get-PSProvider 'Registry').Home = 'path'".
 At line:1 char:1
 + cd ~
 + ~~~~
     + CategoryInfo          : InvalidOperation: (:) [Set-Location], PSInvalidOperationException
     + FullyQualifiedErrorId : InvalidOperation,Microsoft.PowerShell.Commands.SetLocationCommand
 ```
+
+
+#### See also the Capitalization Conventions
+
+In the Code Layout and Formatting chapter, there is a section on [capitalization conventions](Code-Layout-and-Formatting.md#Capitalization-Conventions).

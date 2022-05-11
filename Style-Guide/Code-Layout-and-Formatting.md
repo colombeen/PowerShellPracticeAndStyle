@@ -40,20 +40,15 @@ function Write-Host {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [PSObject]
-        $Object,
+        [psobject]$Object,
 
-        [Switch]
-        $NoNewline,
+        [switch]$NoNewline,
 
-        [PSObject]
-        $Separator,
+        [psobject]$Separator,
 
-        [System.ConsoleColor]
-        $ForegroundColor,
+        [System.ConsoleColor]$ForegroundColor,
 
-        [System.ConsoleColor]
-        $BackgroundColor
+        [System.ConsoleColor]$BackgroundColor
     )
     begin {
     ...
@@ -81,7 +76,7 @@ enum Color {
 
 function Test-Code {
     [CmdletBinding()]
-    param(
+    param (
         [int]$ParameterOne
     )
     end {
@@ -107,7 +102,7 @@ All of your scripts or functions should start life as something like this snippe
 
 ```powershell
 [CmdletBinding()]
-param()
+param ()
 process {
 }
 end {
@@ -116,7 +111,7 @@ end {
 
 You can always delete or ignore one of the blocks (or add the `begin` block), add parameters and necessary validation and so on, but you should **avoid** writing scripts or functions without `[CmdletBinding()]`, and you should always at least _consider_ making it take pipeline input.
 
-#### Prefer: param(), begin, process, end
+#### Prefer: param (), begin, process, end
 
 Having a script written in the order of execution makes the intent clearer. Since there is no functional reason to have these blocks out of order (they _will_ still be executed in the normal order), writing them out of order can be confusing, and makes code more difficult to maintain and debug.
 
@@ -166,7 +161,7 @@ The preferred way to avoid long lines is to use splatting (see [Get-Help about_S
 
 ```powershell
 Write-Host -Object ("This is an incredibly important, and extremely long message. " +
-                         "We cannot afford to leave any part of it out, " + 
+                         "We cannot afford to leave any part of it out, " +
                          "nor do we want line-breaks in the output. " +
                          "Using string concatenation lets us use short lines here, " +
                          "and still get a long line in the output")
@@ -196,7 +191,7 @@ One notable exception is when using colons to pass values to switch parameters:
 
 ```PowerShell
 # Do not write:
-$variable=Get-Content $FilePath -Wai:($ReadCount-gt0) -First($ReadCount*5)
+$variable=Get-Content $FilePath -Wait:($ReadCount-gt0) -First($ReadCount*5)
 
 # Instead write:
 $variable = Get-Content -Path $FilePath -Wait:($ReadCount -gt 0) -TotalCount ($ReadCount * 5)
